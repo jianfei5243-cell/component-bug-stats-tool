@@ -314,14 +314,14 @@ function renderModuleChart(id, mods){
   const total = mods.map(m=>m.bugCount).slice().reverse();
   const sev = mods.map(m=>m.severeUrgent||0).slice().reverse();
   chart.setOption({
-    grid:{left:8,right:46,top:34,bottom:8,containLabel:true},
+    grid:{left:8,right:66,top:34,bottom:8,containLabel:true},
     legend:{data:['BUG 数量','严重+紧急'],top:0},
     tooltip:{trigger:'axis',axisPointer:{type:'shadow'}},
     xAxis:{type:'value',splitLine:{lineStyle:{color:'#eef1f7'}}},
     yAxis:{type:'category',data:cats,axisLine:{show:false},axisTick:{show:false},axisLabel:{fontSize:11,color:'#475569'}},
     series:[
-      {name:'BUG 数量',type:'bar',data:total,barMaxWidth:9,itemStyle:{color:'#2563eb',borderRadius:[0,2,2,0]}},
-      {name:'严重+紧急',type:'bar',data:sev,barMaxWidth:9,itemStyle:{color:'#dc2626',borderRadius:[0,2,2,0]}}
+      {name:'BUG 数量',type:'bar',data:total,barMaxWidth:9,itemStyle:{color:'#2563eb',borderRadius:[0,2,2,0]},label:{show:true,position:'right',color:'#2563eb',fontWeight:600,fontSize:11}},
+      {name:'严重+紧急',type:'bar',data:sev,barMaxWidth:9,itemStyle:{color:'#dc2626',borderRadius:[0,2,2,0]},label:{show:true,position:'right',color:'#dc2626',fontWeight:600,fontSize:11}}
     ]
   });
   chart.resize();
