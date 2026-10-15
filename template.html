@@ -86,13 +86,16 @@ footer{margin-top:18px;color:var(--muted);font-size:12px;line-height:1.7}
       <b>2.</b>
       <label class="filebtn" for="fBug">选择「1015BUG遗留」</label>
       <input type="file" id="fBug" accept=".xlsx,.xls,.csv" hidden>
-      <span class="fname" id="fnBug">已内置默认文件</span>
+      <span class="fname" id="fnBug">未加载，请上传</span>
     </div>
     <div style="flex:1"></div>
     <span style="color:var(--muted);font-size:12px">支持 .xlsx / .xls / .csv，自动识别“组件”列</span>
   </section>
 
-  <section class="cards">
+  <div id="emptyBanner" style="display:block;background:#fffbeb;border:1px solid #fde68a;color:#92400e;border-radius:12px;padding:14px 18px;margin-top:18px;font-size:14px">
+  <b>提示：</b>组件字典已内置《组件对应模块明细》。请点击上方「选择 1015BUG遗留」上传 BUG 表，即可统计各组件 BUG 数量。
+</div>
+<section class="cards">
     <div class="card"><div class="num c1" id="kTotal">-</div><div class="lbl">BUG 记录总数</div></div>
     <div class="card"><div class="num c2" id="kComp">-</div><div class="lbl">涉及组件数</div></div>
     <div class="card"><div class="num c3" id="kMod">-</div><div class="lbl">涉及模块数</div></div>
@@ -119,7 +122,7 @@ footer{margin-top:18px;color:var(--muted);font-size:12px;line-height:1.7}
     </div>
     <div class="controls">
       <input type="text" id="search" placeholder="搜索组件或模块名称…">
-      <label class="check"><input type="checkbox" id="onlyNonzero" checked> 仅显示有 BUG</label>
+      <label class="check"><input type="checkbox" id="onlyNonzero"> 仅显示有 BUG</label>
       <span style="color:var(--muted);font-size:12px" id="rowInfo"></span>
     </div>
     <div class="tbl-wrap">
@@ -128,8 +131,9 @@ footer{margin-top:18px;color:var(--muted);font-size:12px;line-height:1.7}
   </section>
 
   <footer>
-    统计口径说明：① 以《组件对应模块明细》的“组件”列为标准字典，对《1015BUG遗留》M 列“组件”字段计数；
-    ② M 列中如“APP-安卓, BSP-NFC”这类一条记录关联多个组件时，将按逗号拆分并分别计入各组件，因此“组件计数合计”可能大于 BUG 记录总数；
+    使用说明：组件字典已内置《组件对应模块明细》；请上传《1015BUG遗留》文件后统计。
+    统计口径：① 以明细文件的“组件”列为标准字典，对 BUG 表 M 列“组件”字段计数；
+    ② 一条记录关联多个组件（如“APP-安卓, BSP-NFC”）时按逗号拆分分别计入，故“组件计数合计”可能大于 BUG 记录总数；
     ③ 占比 = 该组件/模块 BUG 数量 ÷ BUG 记录总数。
   </footer>
 </main>
@@ -152,7 +156,13 @@ let stats = null;
 let currentTab = 'comp';
 let sortKey = 'bugCount';
 let sortAsc = false;
-let onlyNonzero = true;
+let onlyNonzero = false;
+
+function setOnlyNonzero(v){
+  onlyNonzero = v;
+  const cb = document.getElementById('onlyNonzero');
+  if(cb) cb.checked = v;
+}
 
 function splitTokens(s){
   return String(s==null?'':s)
@@ -195,6 +205,8 @@ function fmtPct(v){
 
 function render(){
   const o = stats.overview;
+  const banner = document.getElementById("emptyBanner");
+  if(banner) banner.style.display = o.bugTotal === 0 ? "block" : "none";
   document.getElementById('kTotal').textContent = o.bugTotal;
   document.getElementById('kComp').textContent = o.componentWithBug;
   document.getElementById('kMod').textContent = o.moduleWithBug;
@@ -365,6 +377,7 @@ function handleBugFile(file){
       }
       bugValues = vals;
       document.getElementById('fnBug').textContent = file.name;
+      setOnlyNonzero(true);
       refresh();
     }catch(err){ alert('解析 BUG 表失败：'+err.message); }
   };
@@ -379,7 +392,8 @@ document.getElementById('btnReset').addEventListener('click', ()=>{
   mappingMap = Object.assign({}, MAPPING_MAP);
   bugValues = BUG_VALUES.slice();
   document.getElementById('fnMapping').textContent = '已内置默认文件';
-  document.getElementById('fnBug').textContent = '已内置默认文件';
+  document.getElementById('fnBug').textContent = '未加载，请上传';
+  setOnlyNonzero(false);
   refresh();
 });
 document.getElementById('search').addEventListener('input', renderTable);

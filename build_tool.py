@@ -7,7 +7,7 @@ from openpyxl.styles import Font, PatternFill, Alignment
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 MAPPING_FILE = sys.argv[1] if len(sys.argv) > 1 else "/Users/weizhuangziji/Downloads/组件对应模块明细.xlsx"
-BUG_FILE = sys.argv[2] if len(sys.argv) > 2 else "/Users/weizhuangziji/Downloads/1015BUG遗留.xlsx"
+BUG_FILE = sys.argv[2] if len(sys.argv) > 2 else None
 XLSX_LIB = "/tmp/xlsx.full.min.js"
 ECHARTS_LIB = "/tmp/echarts.min.js"
 
@@ -94,7 +94,7 @@ def write_excel(path, modules, components, bug_total):
 
 def main():
     order, mapping = load_mapping(MAPPING_FILE)
-    bug_values = load_bug_values(BUG_FILE)
+    bug_values = load_bug_values(BUG_FILE) if BUG_FILE else []
     modules, components = compute(order, mapping, bug_values)
     bug_total = len(bug_values)
 
@@ -116,14 +116,18 @@ def main():
     with open(html_path, "w", encoding="utf-8") as f:
         f.write(html)
     xlsx_path = os.path.join(HERE, "组件BUG统计_结果.xlsx")
-    write_excel(xlsx_path, modules, components, bug_total)
+    if BUG_FILE:
+        write_excel(xlsx_path, modules, components, bug_total)
 
     print("BUG 记录总数:", bug_total)
     print("组件计数合计:", sum(c["bugCount"] for c in components))
     print("涉及组件数:", sum(1 for c in components if c["bugCount"] > 0))
     print("涉及模块数:", sum(1 for m in modules if m["bugCount"] > 0))
     print("生成 HTML:", html_path, f"({os.path.getsize(html_path)/1024:.0f} KB)")
-    print("生成 Excel:", xlsx_path)
+    if BUG_FILE:
+        print("生成 Excel:", xlsx_path)
+    else:
+        print("未加载 BUG 表，跳过结果 Excel 导出（BUG 数据需在工具中上传）")
 
 
 if __name__ == "__main__":

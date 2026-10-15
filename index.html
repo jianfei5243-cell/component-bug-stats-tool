@@ -86,13 +86,16 @@ footer{margin-top:18px;color:var(--muted);font-size:12px;line-height:1.7}
       <b>2.</b>
       <label class="filebtn" for="fBug">选择「1015BUG遗留」</label>
       <input type="file" id="fBug" accept=".xlsx,.xls,.csv" hidden>
-      <span class="fname" id="fnBug">已内置默认文件</span>
+      <span class="fname" id="fnBug">未加载，请上传</span>
     </div>
     <div style="flex:1"></div>
     <span style="color:var(--muted);font-size:12px">支持 .xlsx / .xls / .csv，自动识别“组件”列</span>
   </section>
 
-  <section class="cards">
+  <div id="emptyBanner" style="display:block;background:#fffbeb;border:1px solid #fde68a;color:#92400e;border-radius:12px;padding:14px 18px;margin-top:18px;font-size:14px">
+  <b>提示：</b>组件字典已内置《组件对应模块明细》。请点击上方「选择 1015BUG遗留」上传 BUG 表，即可统计各组件 BUG 数量。
+</div>
+<section class="cards">
     <div class="card"><div class="num c1" id="kTotal">-</div><div class="lbl">BUG 记录总数</div></div>
     <div class="card"><div class="num c2" id="kComp">-</div><div class="lbl">涉及组件数</div></div>
     <div class="card"><div class="num c3" id="kMod">-</div><div class="lbl">涉及模块数</div></div>
@@ -119,7 +122,7 @@ footer{margin-top:18px;color:var(--muted);font-size:12px;line-height:1.7}
     </div>
     <div class="controls">
       <input type="text" id="search" placeholder="搜索组件或模块名称…">
-      <label class="check"><input type="checkbox" id="onlyNonzero" checked> 仅显示有 BUG</label>
+      <label class="check"><input type="checkbox" id="onlyNonzero"> 仅显示有 BUG</label>
       <span style="color:var(--muted);font-size:12px" id="rowInfo"></span>
     </div>
     <div class="tbl-wrap">
@@ -128,8 +131,9 @@ footer{margin-top:18px;color:var(--muted);font-size:12px;line-height:1.7}
   </section>
 
   <footer>
-    统计口径说明：① 以《组件对应模块明细》的“组件”列为标准字典，对《1015BUG遗留》M 列“组件”字段计数；
-    ② M 列中如“APP-安卓, BSP-NFC”这类一条记录关联多个组件时，将按逗号拆分并分别计入各组件，因此“组件计数合计”可能大于 BUG 记录总数；
+    使用说明：组件字典已内置《组件对应模块明细》；请上传《1015BUG遗留》文件后统计。
+    统计口径：① 以明细文件的“组件”列为标准字典，对 BUG 表 M 列“组件”字段计数；
+    ② 一条记录关联多个组件（如“APP-安卓, BSP-NFC”）时按逗号拆分分别计入，故“组件计数合计”可能大于 BUG 记录总数；
     ③ 占比 = 该组件/模块 BUG 数量 ÷ BUG 记录总数。
   </footer>
 </main>
@@ -210,7 +214,7 @@ var Fr={},Gr={};var Wr,Hr=function(){function t(t,e,n){var i=this;this._sleepAft
 <script>
 const MAPPING_ORDER = ["APP-IOS", "APP-产品", "APP-安卓", "BSP-A+G", "BSP-Audio", "BSP-GPS", "BSP-LCD", "BSP-Modem", "BSP-NFC", "BSP-PPG", "BSP-RTC", "BSP-TP", "BSP-WIFI", "BSP-充电", "BSP-光感", "BSP-功耗", "BSP-地磁", "BSP-存储", "BSP-按键", "BSP-气压计", "BSP-温升", "BSP-电量计", "BSP-表冠", "BSP-马达", "FW-App发起运动", "FW-esim功耗优化", "FW-OOBE", "FW-OTA", "FW-一键体检", "FW-三方应用", "FW-世界时钟", "FW-主交互", "FW-互联互通", "FW-产品", "FW-倒计时", "FW-健康扫描", "FW-健康摘要", "FW-健康算法", "FW-元气值", "FW-充电", "FW-创新研究平台", "FW-协议", "FW-卡包", "FW-压力", "FW-呼吸", "FW-售后自检工具", "FW-售后需求", "FW-埋点", "FW-天气", "FW-女性健康", "FW-女性安全", "FW-小爱", "FW-小组件", "FW-工模", "FW-应用列表", "FW-录音机", "FW-待办", "FW-微信", "FW-心率", "FW-性能", "FW-手势", "FW-手电筒", "FW-找手机", "FW-指南针", "FW-按键截屏", "FW-摔倒检测", "FW-支付宝", "FW-新手引导", "FW-日历日程", "FW-本地化", "FW-查找设备", "FW-气压海拔", "FW-添加设备", "FW-演示模式", "FW-电话", "FW-睡眠", "FW-短信", "FW-秒表", "FW-稳定性", "FW-米家", "FW-系统", "FW-网络对讲", "FW-蓝牙", "FW-融合设备中心", "FW-血氧", "FW-表盘", "FW-表盘名称", "FW-表盘编辑", "FW-解锁miui手机", "FW-设置", "FW-运动", "FW-运动Switch联动", "FW-运动中", "FW-运动准备", "FW-运动列表", "FW-运动地图", "FW-运动多端联动", "FW-运动导航与路线", "FW-运动录制Vlog", "FW-运动报告", "FW-运动提醒", "FW-运动活力指标", "FW-运动游戏模式", "FW-运动热身拉伸", "FW-运动算法", "FW-运动联动", "FW-运动自动暂停", "FW-运动自识别", "FW-运动训练状态", "FW-运动记录", "FW-运动设置", "FW-运动跑步课程与计划", "FW-运动间歇训练", "FW-通知", "FW-遥控拍照", "FW-门锁", "FW-闹钟", "FW-音乐", "SW-音频主客观", "VELA-BT", "VELA-WIFI", "VELA-三方应用", "xiaomi-小爱", "三方-体感", "互联-妙播", "互联-设备中心", "互联互通-车机", "小米汽车app", "市场-三方应用", "市场表盘", "本地化翻译", "查找APP", "米家App", "米家门锁", "米端算法-PPG血压", "米端算法-佩戴检测", "米端算法-元气值", "米端算法-动作计数", "米端算法-卡路里", "米端算法-压力", "米端算法-呼吸暂停", "米端算法-女性健康", "米端算法-导航", "米端算法-心率", "米端算法-心脏健康研究", "米端算法-房颤", "米端算法-手势", "米端算法-手势操控", "米端算法-抬腕亮屏", "米端算法-最大摄氧量", "米端算法-游泳", "米端算法-滑雪", "米端算法-睡眠", "米端算法-睡眠呼吸率", "米端算法-睡眠节律", "米端算法-站立", "米端算法-自动暂停恢复", "米端算法-自动识别", "米端算法-血氧", "米端算法-计步", "米端算法-训练体系", "米端算法-跑力指数_成绩预测", "米端算法-跑姿", "米端算法-运动", "表盘", "表盘工具", "试用反馈"];
 const MAPPING_MAP = {"APP-IOS": "APP", "APP-产品": "APP", "APP-安卓": "APP", "BSP-A+G": "运动", "BSP-Audio": "音频", "BSP-GPS": "运动", "BSP-LCD": "TP/LCD", "BSP-Modem": "ESIM", "BSP-NFC": "NFC", "BSP-PPG": "健康", "BSP-RTC": "设置", "BSP-TP": "TP/LCD", "BSP-WIFI": "WIFI", "BSP-充电": "功耗", "BSP-光感": "TP/LCD", "BSP-功耗": "功耗", "BSP-地磁": "运动", "BSP-存储": "稳定性", "BSP-按键": "系统", "BSP-气压计": "运动", "BSP-温升": "系统", "BSP-电量计": "系统", "BSP-表冠": "系统", "BSP-马达": "音频", "FW-App发起运动": "运动", "FW-esim功耗优化": "功耗", "FW-OOBE": "短距", "FW-OTA": "应用", "FW-一键体检": "健康", "FW-三方应用": "应用", "FW-世界时钟": "应用", "FW-主交互": "系统", "FW-互联互通": "短距", "FW-产品": "产品", "FW-倒计时": "应用", "FW-健康扫描": "健康", "FW-健康摘要": "健康", "FW-健康算法": "健康", "FW-元气值": "运动", "FW-充电": "功耗", "FW-创新研究平台": "健康", "FW-协议": "短距", "FW-卡包": "NFC", "FW-压力": "健康", "FW-呼吸": "健康", "FW-售后自检工具": "产品", "FW-售后需求": "产品", "FW-埋点": "埋点", "FW-天气": "应用", "FW-女性健康": "健康", "FW-女性安全": "健康", "FW-小爱": "应用", "FW-小组件": "系统", "FW-工模": "产品", "FW-应用列表": "应用", "FW-录音机": "应用", "FW-待办": "应用", "FW-微信": "应用", "FW-心率": "健康", "FW-性能": "性能", "FW-手势": "健康", "FW-手电筒": "应用", "FW-找手机": "应用", "FW-指南针": "应用", "FW-按键截屏": "系统", "FW-摔倒检测": "运动", "FW-支付宝": "应用", "FW-新手引导": "系统", "FW-日历日程": "应用", "FW-本地化": "本地化", "FW-查找设备": "短距", "FW-气压海拔": "运动", "FW-添加设备": "短距", "FW-演示模式": "系统", "FW-电话": "短距", "FW-睡眠": "健康", "FW-短信": "ESIM", "FW-秒表": "应用", "FW-稳定性": "稳定性", "FW-米家": "短距", "FW-系统": "系统", "FW-网络对讲": "ESIM", "FW-蓝牙": "短距", "FW-融合设备中心": "短距", "FW-血氧": "健康", "FW-表盘": "系统", "FW-表盘名称": "系统", "FW-表盘编辑": "系统", "FW-解锁miui手机": "短距", "FW-设置": "系统", "FW-运动": "运动", "FW-运动Switch联动": "运动", "FW-运动中": "运动", "FW-运动准备": "运动", "FW-运动列表": "运动", "FW-运动地图": "运动", "FW-运动多端联动": "运动", "FW-运动导航与路线": "运动", "FW-运动录制Vlog": "运动", "FW-运动报告": "运动", "FW-运动提醒": "运动", "FW-运动活力指标": "运动", "FW-运动游戏模式": "运动", "FW-运动热身拉伸": "运动", "FW-运动算法": "运动", "FW-运动联动": "运动", "FW-运动自动暂停": "运动", "FW-运动自识别": "运动", "FW-运动训练状态": "运动", "FW-运动记录": "运动", "FW-运动设置": "运动", "FW-运动跑步课程与计划": "运动", "FW-运动间歇训练": "运动", "FW-通知": "系统", "FW-遥控拍照": "应用", "FW-门锁": "短距", "FW-闹钟": "应用", "FW-音乐": "应用", "SW-音频主客观": "音频", "VELA-BT": "短距", "VELA-WIFI": "WIFI", "VELA-三方应用": "应用", "xiaomi-小爱": "应用", "三方-体感": "应用", "互联-妙播": "短距", "互联-设备中心": "短距", "互联互通-车机": "短距", "小米汽车app": "短距", "市场-三方应用": "应用", "市场表盘": "系统", "本地化翻译": "本地化", "查找APP": "短距", "米家App": "短距", "米家门锁": "短距", "米端算法-PPG血压": "健康", "米端算法-佩戴检测": "健康", "米端算法-元气值": "健康", "米端算法-动作计数": "运动", "米端算法-卡路里": "健康", "米端算法-压力": "健康", "米端算法-呼吸暂停": "健康", "米端算法-女性健康": "健康", "米端算法-导航": "运动", "米端算法-心率": "健康", "米端算法-心脏健康研究": "健康", "米端算法-房颤": "健康", "米端算法-手势": "健康", "米端算法-手势操控": "健康", "米端算法-抬腕亮屏": "健康", "米端算法-最大摄氧量": "健康", "米端算法-游泳": "运动", "米端算法-滑雪": "运动", "米端算法-睡眠": "健康", "米端算法-睡眠呼吸率": "健康", "米端算法-睡眠节律": "健康", "米端算法-站立": "运动", "米端算法-自动暂停恢复": "运动", "米端算法-自动识别": "运动", "米端算法-血氧": "健康", "米端算法-计步": "运动", "米端算法-训练体系": "健康", "米端算法-跑力指数_成绩预测": "运动", "米端算法-跑姿": "运动", "米端算法-运动": "运动", "表盘": "系统", "表盘工具": "系统", "试用反馈": "Beta"};
-const BUG_VALUES = ["FW-支付宝", "FW-稳定性", "FW-运动算法", "FW-产品", "FW-产品", "FW-蓝牙", "FW-运动活力指标", "FW-表盘", "FW-运动提醒", "FW-睡眠", "FW-睡眠", "FW-创新研究平台", "FW-性能", "FW-运动算法", "FW-运动算法", "FW-运动导航与路线", "FW-稳定性", "FW-性能", "FW-性能", "FW-性能", "FW-性能", "FW-性能", "FW-运动记录", "FW-元气值", "FW-压力", "FW-融合设备中心", "FW-通知", "FW-互联互通", "FW-应用列表", "FW-支付宝", "FW-互联互通", "FW-心率", "FW-性能", "FW-运动提醒", "FW-设置", "FW-OOBE", "FW-性能", "BSP-WIFI", "FW-通知", "FW-通知", "FW-性能", "BSP-WIFI", "FW-运动", "FW-运动算法", "FW-健康算法", "FW-性能", "FW-性能", "FW-性能", "FW-性能", "FW-性能", "FW-性能", "BSP-WIFI", "FW-通知", "FW-通知", "FW-性能", "FW-运动", "FW-性能", "FW-性能", "FW-性能", "FW-性能", "FW-性能", "FW-性能", "FW-性能", "FW-性能", "FW-性能", "FW-性能", "FW-通知", "FW-性能", "FW-性能", "FW-运动报告", "APP-安卓", "FW-日历日程", "FW-日历日程", "FW-通知", "FW-查找设备", "FW-性能", "FW-世界时钟", "FW-三方应用", "FW-稳定性", "FW-稳定性", "FW-稳定性", "FW-健康扫描", "FW-压力", "FW-微信", "FW-系统", "FW-运动提醒", "FW-运动报告", "APP-安卓", "FW-稳定性", "FW-运动训练状态", "米端算法-运动", "FW-支付宝", "FW-睡眠", "FW-运动中", "FW-运动导航与路线", "FW-运动记录", "BSP-GPS", "FW-遥控拍照", "FW-稳定性", "FW-运动设置", "APP-安卓", "FW-稳定性", "FW-支付宝", "FW-性能", "FW-性能", "FW-性能", "FW-性能", "FW-融合设备中心", "FW-运动中", "FW-稳定性", "FW-稳定性", "FW-性能", "FW-互联互通", "FW-性能", "FW-运动", "FW-融合设备中心", "FW-性能", "FW-性能", "FW-性能", "FW-性能", "FW-三方应用", "FW-性能", "FW-三方应用", "FW-心率", "FW-健康摘要", "FW-运动多端联动", "FW-稳定性", "FW-互联互通", "FW-性能", "FW-性能", "FW-性能", "FW-摔倒检测", "FW-性能", "FW-性能", "FW-运动多端联动", "FW-三方应用", "FW-运动设置", "FW-互联互通", "FW-运动提醒", "FW-健康摘要", "FW-支付宝", "FW-互联互通", "FW-支付宝", "FW-运动", "FW-稳定性", "FW-稳定性", "FW-稳定性", "FW-稳定性", "FW-稳定性", "FW-稳定性", "FW-元气值", "FW-稳定性", "FW-稳定性", "FW-摔倒检测", "FW-产品", "FW-睡眠", "FW-微信", "FW-支付宝", "FW-呼吸", "FW-睡眠", "FW-性能", "FW-运动多端联动", "FW-运动活力指标", "FW-稳定性", "FW-睡眠", "FW-小组件", "FW-运动报告", "FW-互联互通", "FW-运动报告", "FW-天气", "FW-待办", "APP-安卓, BSP-NFC", "FW-三方应用", "FW-三方应用", "VELA-三方应用", "FW-运动报告", "FW-性能", "FW-健康扫描", "FW-性能", "FW-性能", "FW-网络对讲", "FW-性能", "FW-手势", "FW-运动设置", "FW-气压海拔", "FW-小组件", "APP-安卓, BSP-NFC", "FW-支付宝", "FW-小组件", "FW-支付宝", "FW-表盘", "FW-女性健康", "FW-运动活力指标", "FW-小组件", "FW-音乐", "FW-压力", "FW-录音机", "FW-心率", "FW-运动地图", "FW-运动设置", "FW-心率", "FW-心率", "FW-运动设置", "FW-运动跑步课程与计划", "FW-运动设置", "FW-压力", "FW-运动设置", "FW-心率", "FW-待办", "FW-小组件", "FW-心率", "FW-小组件", "FW-小组件", "FW-运动设置", "FW-运动设置", "FW-运动设置", "FW-待办", "FW-运动报告", "FW-小组件", "FW-表盘", "FW-互联互通", "FW-表盘", "FW-表盘", "APP-IOS", "FW-找手机", "FW-运动准备", "FW-音乐", "FW-运动训练状态", "FW-录音机", "FW-录音机", "FW-待办", "FW-表盘", "FW-录音机", "FW-手势", "FW-压力", "FW-性能", "FW-新手引导", "FW-性能", "APP-安卓, BSP-NFC", "FW-稳定性", "FW-稳定性", "FW-稳定性", "FW-支付宝", "FW-性能", "FW-性能", "FW-元气值", "FW-新手引导", "APP-IOS", "APP-IOS", "FW-睡眠", "FW-运动报告", "FW-小组件", "FW-表盘", "FW-三方应用", "FW-女性健康", "FW-设置", "FW-新手引导", "FW-三方应用", "FW-稳定性", "FW-气压海拔", "FW-健康摘要", "FW-产品", "FW-性能", "FW-心率", "FW-稳定性", "FW-运动报告", "BSP-功耗", "BSP-功耗", "FW-运动活力指标", "FW-运动活力指标", "FW-音乐", "FW-充电", "FW-运动设置", "FW-系统", "APP-IOS", "FW-遥控拍照", "FW-OOBE", "FW-小爱", "FW-小组件", "FW-运动多端联动", "FW-稳定性", "FW-创新研究平台", "FW-微信", "FW-产品", "FW-运动设置", "APP-安卓, BSP-NFC", "FW-微信", "FW-产品", "FW-支付宝", "FW-运动活力指标", "FW-充电", "FW-系统", "FW-充电", "FW-充电", "FW-设置", "FW-三方应用", "FW-表盘", "FW-充电", "FW-三方应用", "FW-性能", "FW-性能", "FW-性能", "FW-遥控拍照", "FW-健康摘要", "FW-遥控拍照", "FW-遥控拍照", "FW-遥控拍照", "FW-性能", "FW-倒计时", "FW-日历日程", "FW-遥控拍照", "FW-互联互通", "FW-充电", "FW-天气", "FW-运动导航与路线", "FW-电话", "FW-支付宝", "FW-表盘", "FW-微信", "FW-遥控拍照", "FW-支付宝", "APP-安卓", "FW-支付宝", "FW-三方应用", "FW-互联互通", "FW-支付宝", "FW-运动活力指标", "FW-互联互通", "FW-表盘", "FW-健康扫描", "FW-互联互通", "FW-性能", "FW-性能", "FW-性能", "FW-元气值", "FW-微信", "FW-三方应用", "FW-支付宝", "APP-安卓", "FW-三方应用", "FW-性能", "FW-睡眠", "FW-三方应用", "FW-天气", "FW-OTA", "FW-充电", "FW-产品", "FW-闹钟", "FW-心率", "FW-睡眠", "FW-设置", "FW-支付宝", "FW-闹钟", "FW-解锁miui手机", "FW-睡眠", "FW-运动提醒", "FW-稳定性", "FW-闹钟", "FW-小组件", "FW-表盘", "FW-三方应用", "FW-三方应用", "FW-应用列表", "FW-微信", "FW-三方应用", "FW-三方应用", "FW-三方应用", "FW-运动活力指标", "FW-元气值", "FW-遥控拍照", "FW-倒计时", "FW-稳定性", "FW-遥控拍照", "FW-运动录制Vlog", "FW-遥控拍照", "FW-三方应用", "FW-微信", "FW-倒计时", "FW-健康算法", "FW-产品", "FW-微信", "FW-三方应用", "FW-主交互", "FW-日历日程", "FW-运动中", "FW-三方应用", "FW-微信", "FW-查找设备", "FW-运动报告", "FW-三方应用", "APP-安卓", "FW-微信", "FW-运动报告", "FW-设置", "FW-设置", "APP-安卓", "FW-微信", "FW-互联互通", "FW-设置", "FW-三方应用", "FW-压力, FW-心率, FW-血氧", "FW-短信", "FW-世界时钟", "FW-三方应用", "FW-找手机", "米端算法-运动", "FW-世界时钟", "FW-微信", "FW-稳定性", "BSP-WIFI", "FW-世界时钟", "FW-运动", "FW-三方应用", "FW-倒计时", "FW-三方应用", "FW-世界时钟", "FW-音乐", "FW-支付宝", "FW-秒表", "FW-秒表", "FW-三方应用", "FW-性能", "FW-性能", "FW-性能", "FW-性能", "FW-性能", "FW-性能", "FW-三方应用", "FW-三方应用", "FW-三方应用", "FW-日历日程", "FW-运动提醒", "FW-融合设备中心", "FW-三方应用", "FW-通知", "FW-压力", "FW-融合设备中心", "FW-表盘编辑", "FW-闹钟", "FW-压力", "FW-日历日程", "FW-运动提醒", "FW-运动设置", "FW-运动设置", "FW-互联互通", "FW-蓝牙", "FW-运动", "FW-稳定性", "FW-稳定性", "BSP-A+G", "BSP-TP", "FW-融合设备中心", "FW-融合设备中心", "FW-融合设备中心", "互联-设备中心", "FW-性能", "FW-性能", "FW-性能", "FW-性能", "FW-三方应用", "FW-性能", "FW-稳定性", "FW-运动报告", "FW-运动算法", "FW-互联互通", "FW-互联互通", "FW-互联互通", "FW-日历日程", "FW-日历日程", "FW-互联互通", "FW-互联互通", "FW-互联互通", "FW-电话", "FW-稳定性", "FW-卡包", "FW-卡包", "FW-运动活力指标", "FW-互联互通", "FW-运动", "FW-创新研究平台", "FW-卡包", "FW-设置", "FW-设置", "FW-OOBE", "FW-手势", "FW-设置", "FW-设置", "FW-设置", "FW-运动录制Vlog", "FW-稳定性", "FW-蓝牙", "BSP-功耗", "BSP-存储", "FW-设置", "FW-设置", "FW-设置", "FW-设置", "FW-电话", "FW-设置", "FW-设置", "FW-设置", "FW-稳定性", "FW-添加设备", "FW-心率", "FW-应用列表", "FW-稳定性", "FW-运动提醒", "FW-协议"];
+const BUG_VALUES = [];
 
 let mappingOrder = MAPPING_ORDER.slice();
 let mappingMap = Object.assign({}, MAPPING_MAP);
@@ -219,7 +223,13 @@ let stats = null;
 let currentTab = 'comp';
 let sortKey = 'bugCount';
 let sortAsc = false;
-let onlyNonzero = true;
+let onlyNonzero = false;
+
+function setOnlyNonzero(v){
+  onlyNonzero = v;
+  const cb = document.getElementById('onlyNonzero');
+  if(cb) cb.checked = v;
+}
 
 function splitTokens(s){
   return String(s==null?'':s)
@@ -262,6 +272,8 @@ function fmtPct(v){
 
 function render(){
   const o = stats.overview;
+  const banner = document.getElementById("emptyBanner");
+  if(banner) banner.style.display = o.bugTotal === 0 ? "block" : "none";
   document.getElementById('kTotal').textContent = o.bugTotal;
   document.getElementById('kComp').textContent = o.componentWithBug;
   document.getElementById('kMod').textContent = o.moduleWithBug;
@@ -432,6 +444,7 @@ function handleBugFile(file){
       }
       bugValues = vals;
       document.getElementById('fnBug').textContent = file.name;
+      setOnlyNonzero(true);
       refresh();
     }catch(err){ alert('解析 BUG 表失败：'+err.message); }
   };
@@ -446,7 +459,8 @@ document.getElementById('btnReset').addEventListener('click', ()=>{
   mappingMap = Object.assign({}, MAPPING_MAP);
   bugValues = BUG_VALUES.slice();
   document.getElementById('fnMapping').textContent = '已内置默认文件';
-  document.getElementById('fnBug').textContent = '已内置默认文件';
+  document.getElementById('fnBug').textContent = '未加载，请上传';
+  setOnlyNonzero(false);
   refresh();
 });
 document.getElementById('search').addEventListener('input', renderTable);
