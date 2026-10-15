@@ -27,11 +27,11 @@ main{max-width:1280px;margin:0 auto;padding:24px 20px 40px}
 label.filebtn{display:inline-flex;align-items:center;gap:6px;background:var(--soft);color:var(--brand);border:1px dashed #b8c4f0;border-radius:8px;padding:9px 14px;cursor:pointer;font-weight:600}
 label.filebtn:hover{background:#e4e9ff}
 .fname{max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)}
-.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:18px 0}
+.cards{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin:18px 0}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;box-shadow:0 1px 3px rgba(17,24,39,.05)}
 .card .num{font-size:30px;font-weight:800;line-height:1.1}
 .card .lbl{margin-top:8px;color:var(--muted);font-size:13px}
-.card .num.c1{color:var(--brand)}.card .num.c2{color:var(--brand2)}.card .num.c3{color:var(--ok)}.card .num.c4{color:var(--warn)}
+.card .num.c1{color:var(--brand)}.card .num.c2{color:var(--brand2)}.card .num.c3{color:var(--ok)}.card .num.c4{color:var(--warn)}.card .num.c5{color:#dc2626}
 .charts{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0}
 .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;box-shadow:0 1px 3px rgba(17,24,39,.05)}
 .panel h2{margin:0 0 4px;font-size:16px}
@@ -93,13 +93,14 @@ footer{margin-top:18px;color:var(--muted);font-size:12px;line-height:1.7}
   </section>
 
   <div id="emptyBanner" style="display:block;background:#fffbeb;border:1px solid #fde68a;color:#92400e;border-radius:12px;padding:14px 18px;margin-top:18px;font-size:14px">
-  <b>提示：</b>组件字典已内置《组件对应模块明细》。请点击上方「请输入BUGlist」上传 BUG 表，即可统计各组件 BUG 数量。
+  <b>提示：</b>组件字典已内置《组件对应模块明细》。请点击上方「请输入BUGlist」上传 BUG 表，即可统计各组件 BUG 数量及各模块“严重+紧急”数量。
 </div>
 <section class="cards">
     <div class="card"><div class="num c1" id="kTotal">-</div><div class="lbl">BUG 记录总数</div></div>
     <div class="card"><div class="num c2" id="kComp">-</div><div class="lbl">涉及组件数</div></div>
     <div class="card"><div class="num c3" id="kMod">-</div><div class="lbl">涉及模块数</div></div>
     <div class="card"><div class="num c4" id="kSum">-</div><div class="lbl">组件计数合计（含多组件归属）</div></div>
+    <div class="card"><div class="num c5" id="kSev">-</div><div class="lbl">严重+紧急 BUG</div></div>
   </section>
 
   <section class="charts">
@@ -214,11 +215,11 @@ var Fr={},Gr={};var Wr,Hr=function(){function t(t,e,n){var i=this;this._sleepAft
 <script>
 const MAPPING_ORDER = ["APP-IOS", "APP-产品", "APP-安卓", "BSP-A+G", "BSP-Audio", "BSP-GPS", "BSP-LCD", "BSP-Modem", "BSP-NFC", "BSP-PPG", "BSP-RTC", "BSP-TP", "BSP-WIFI", "BSP-充电", "BSP-光感", "BSP-功耗", "BSP-地磁", "BSP-存储", "BSP-按键", "BSP-气压计", "BSP-温升", "BSP-电量计", "BSP-表冠", "BSP-马达", "FW-App发起运动", "FW-esim功耗优化", "FW-OOBE", "FW-OTA", "FW-一键体检", "FW-三方应用", "FW-世界时钟", "FW-主交互", "FW-互联互通", "FW-产品", "FW-倒计时", "FW-健康扫描", "FW-健康摘要", "FW-健康算法", "FW-元气值", "FW-充电", "FW-创新研究平台", "FW-协议", "FW-卡包", "FW-压力", "FW-呼吸", "FW-售后自检工具", "FW-售后需求", "FW-埋点", "FW-天气", "FW-女性健康", "FW-女性安全", "FW-小爱", "FW-小组件", "FW-工模", "FW-应用列表", "FW-录音机", "FW-待办", "FW-微信", "FW-心率", "FW-性能", "FW-手势", "FW-手电筒", "FW-找手机", "FW-指南针", "FW-按键截屏", "FW-摔倒检测", "FW-支付宝", "FW-新手引导", "FW-日历日程", "FW-本地化", "FW-查找设备", "FW-气压海拔", "FW-添加设备", "FW-演示模式", "FW-电话", "FW-睡眠", "FW-短信", "FW-秒表", "FW-稳定性", "FW-米家", "FW-系统", "FW-网络对讲", "FW-蓝牙", "FW-融合设备中心", "FW-血氧", "FW-表盘", "FW-表盘名称", "FW-表盘编辑", "FW-解锁miui手机", "FW-设置", "FW-运动", "FW-运动Switch联动", "FW-运动中", "FW-运动准备", "FW-运动列表", "FW-运动地图", "FW-运动多端联动", "FW-运动导航与路线", "FW-运动录制Vlog", "FW-运动报告", "FW-运动提醒", "FW-运动活力指标", "FW-运动游戏模式", "FW-运动热身拉伸", "FW-运动算法", "FW-运动联动", "FW-运动自动暂停", "FW-运动自识别", "FW-运动训练状态", "FW-运动记录", "FW-运动设置", "FW-运动跑步课程与计划", "FW-运动间歇训练", "FW-通知", "FW-遥控拍照", "FW-门锁", "FW-闹钟", "FW-音乐", "SW-音频主客观", "VELA-BT", "VELA-WIFI", "VELA-三方应用", "xiaomi-小爱", "三方-体感", "互联-妙播", "互联-设备中心", "互联互通-车机", "小米汽车app", "市场-三方应用", "市场表盘", "本地化翻译", "查找APP", "米家App", "米家门锁", "米端算法-PPG血压", "米端算法-佩戴检测", "米端算法-元气值", "米端算法-动作计数", "米端算法-卡路里", "米端算法-压力", "米端算法-呼吸暂停", "米端算法-女性健康", "米端算法-导航", "米端算法-心率", "米端算法-心脏健康研究", "米端算法-房颤", "米端算法-手势", "米端算法-手势操控", "米端算法-抬腕亮屏", "米端算法-最大摄氧量", "米端算法-游泳", "米端算法-滑雪", "米端算法-睡眠", "米端算法-睡眠呼吸率", "米端算法-睡眠节律", "米端算法-站立", "米端算法-自动暂停恢复", "米端算法-自动识别", "米端算法-血氧", "米端算法-计步", "米端算法-训练体系", "米端算法-跑力指数_成绩预测", "米端算法-跑姿", "米端算法-运动", "表盘", "表盘工具", "试用反馈"];
 const MAPPING_MAP = {"APP-IOS": "APP", "APP-产品": "APP", "APP-安卓": "APP", "BSP-A+G": "运动", "BSP-Audio": "音频", "BSP-GPS": "运动", "BSP-LCD": "TP/LCD", "BSP-Modem": "ESIM", "BSP-NFC": "NFC", "BSP-PPG": "健康", "BSP-RTC": "设置", "BSP-TP": "TP/LCD", "BSP-WIFI": "WIFI", "BSP-充电": "功耗", "BSP-光感": "TP/LCD", "BSP-功耗": "功耗", "BSP-地磁": "运动", "BSP-存储": "稳定性", "BSP-按键": "系统", "BSP-气压计": "运动", "BSP-温升": "系统", "BSP-电量计": "系统", "BSP-表冠": "系统", "BSP-马达": "音频", "FW-App发起运动": "运动", "FW-esim功耗优化": "功耗", "FW-OOBE": "短距", "FW-OTA": "应用", "FW-一键体检": "健康", "FW-三方应用": "应用", "FW-世界时钟": "应用", "FW-主交互": "系统", "FW-互联互通": "短距", "FW-产品": "产品", "FW-倒计时": "应用", "FW-健康扫描": "健康", "FW-健康摘要": "健康", "FW-健康算法": "健康", "FW-元气值": "运动", "FW-充电": "功耗", "FW-创新研究平台": "健康", "FW-协议": "短距", "FW-卡包": "NFC", "FW-压力": "健康", "FW-呼吸": "健康", "FW-售后自检工具": "产品", "FW-售后需求": "产品", "FW-埋点": "埋点", "FW-天气": "应用", "FW-女性健康": "健康", "FW-女性安全": "健康", "FW-小爱": "应用", "FW-小组件": "系统", "FW-工模": "产品", "FW-应用列表": "应用", "FW-录音机": "应用", "FW-待办": "应用", "FW-微信": "应用", "FW-心率": "健康", "FW-性能": "性能", "FW-手势": "健康", "FW-手电筒": "应用", "FW-找手机": "应用", "FW-指南针": "应用", "FW-按键截屏": "系统", "FW-摔倒检测": "运动", "FW-支付宝": "应用", "FW-新手引导": "系统", "FW-日历日程": "应用", "FW-本地化": "本地化", "FW-查找设备": "短距", "FW-气压海拔": "运动", "FW-添加设备": "短距", "FW-演示模式": "系统", "FW-电话": "短距", "FW-睡眠": "健康", "FW-短信": "ESIM", "FW-秒表": "应用", "FW-稳定性": "稳定性", "FW-米家": "短距", "FW-系统": "系统", "FW-网络对讲": "ESIM", "FW-蓝牙": "短距", "FW-融合设备中心": "短距", "FW-血氧": "健康", "FW-表盘": "系统", "FW-表盘名称": "系统", "FW-表盘编辑": "系统", "FW-解锁miui手机": "短距", "FW-设置": "系统", "FW-运动": "运动", "FW-运动Switch联动": "运动", "FW-运动中": "运动", "FW-运动准备": "运动", "FW-运动列表": "运动", "FW-运动地图": "运动", "FW-运动多端联动": "运动", "FW-运动导航与路线": "运动", "FW-运动录制Vlog": "运动", "FW-运动报告": "运动", "FW-运动提醒": "运动", "FW-运动活力指标": "运动", "FW-运动游戏模式": "运动", "FW-运动热身拉伸": "运动", "FW-运动算法": "运动", "FW-运动联动": "运动", "FW-运动自动暂停": "运动", "FW-运动自识别": "运动", "FW-运动训练状态": "运动", "FW-运动记录": "运动", "FW-运动设置": "运动", "FW-运动跑步课程与计划": "运动", "FW-运动间歇训练": "运动", "FW-通知": "系统", "FW-遥控拍照": "应用", "FW-门锁": "短距", "FW-闹钟": "应用", "FW-音乐": "应用", "SW-音频主客观": "音频", "VELA-BT": "短距", "VELA-WIFI": "WIFI", "VELA-三方应用": "应用", "xiaomi-小爱": "应用", "三方-体感": "应用", "互联-妙播": "短距", "互联-设备中心": "短距", "互联互通-车机": "短距", "小米汽车app": "短距", "市场-三方应用": "应用", "市场表盘": "系统", "本地化翻译": "本地化", "查找APP": "短距", "米家App": "短距", "米家门锁": "短距", "米端算法-PPG血压": "健康", "米端算法-佩戴检测": "健康", "米端算法-元气值": "健康", "米端算法-动作计数": "运动", "米端算法-卡路里": "健康", "米端算法-压力": "健康", "米端算法-呼吸暂停": "健康", "米端算法-女性健康": "健康", "米端算法-导航": "运动", "米端算法-心率": "健康", "米端算法-心脏健康研究": "健康", "米端算法-房颤": "健康", "米端算法-手势": "健康", "米端算法-手势操控": "健康", "米端算法-抬腕亮屏": "健康", "米端算法-最大摄氧量": "健康", "米端算法-游泳": "运动", "米端算法-滑雪": "运动", "米端算法-睡眠": "健康", "米端算法-睡眠呼吸率": "健康", "米端算法-睡眠节律": "健康", "米端算法-站立": "运动", "米端算法-自动暂停恢复": "运动", "米端算法-自动识别": "运动", "米端算法-血氧": "健康", "米端算法-计步": "运动", "米端算法-训练体系": "健康", "米端算法-跑力指数_成绩预测": "运动", "米端算法-跑姿": "运动", "米端算法-运动": "运动", "表盘": "系统", "表盘工具": "系统", "试用反馈": "Beta"};
-const BUG_VALUES = [];
+const BUG_RECORDS = [];
 
 let mappingOrder = MAPPING_ORDER.slice();
 let mappingMap = Object.assign({}, MAPPING_MAP);
-let bugValues = BUG_VALUES.slice();
+let bugRecords = BUG_RECORDS.slice();
 let stats = null;
 let currentTab = 'comp';
 let sortKey = 'bugCount';
@@ -239,13 +240,28 @@ function splitTokens(s){
     .filter(Boolean);
 }
 
-function computeStats(order, map, bugs){
+function computeStats(order, map, bugRecords){
   const counts = {};
-  bugs.forEach(bv => splitTokens(bv).forEach(t => { counts[t] = (counts[t]||0)+1; }));
-  const bugTotal = bugs.length;
+  const sevComp = {};
+  const sevMod = {};
+  let severeUrgentTotal = 0;
+  bugRecords.forEach(rec => {
+    const toks = splitTokens(rec.comp);
+    toks.forEach(t => { counts[t] = (counts[t]||0)+1; });
+    const pri = String(rec.priority||'').trim();
+    if(pri === '严重' || pri === '紧急'){
+      severeUrgentTotal++;
+      toks.forEach(t => {
+        sevComp[t] = (sevComp[t]||0)+1;
+        const m = map[t] || '未分类';
+        sevMod[m] = (sevMod[m]||0)+1;
+      });
+    }
+  });
+  const bugTotal = bugRecords.length;
   const componentSum = Object.values(counts).reduce((a,b)=>a+b,0);
-  const components = order.map(c => ({component:c, module:map[c]||'未分类', bugCount:counts[c]||0}));
-  Object.keys(counts).forEach(t => { if(!(t in map)) components.push({component:t, module:'未分类', bugCount:counts[t]}); });
+  const components = order.map(c => ({component:c, module:map[c]||'未分类', bugCount:counts[c]||0, severeUrgent:sevComp[c]||0}));
+  Object.keys(counts).forEach(t => { if(!(t in map)) components.push({component:t, module:'未分类', bugCount:counts[t], severeUrgent:sevComp[t]||0}); });
   components.sort((a,b)=> (b.bugCount-a.bugCount) || a.component.localeCompare(b.component,'zh'));
   const modBug = {}, modComp = {};
   components.forEach(c => {
@@ -253,15 +269,15 @@ function computeStats(order, map, bugs){
     if(c.bugCount>0) modComp[c.module] = (modComp[c.module]||0) + 1;
   });
   const modules = Object.keys(modBug)
-    .map(m => ({module:m, bugCount:modBug[m], componentCount:modComp[m]||0}))
+    .map(m => ({module:m, bugCount:modBug[m], componentCount:modComp[m]||0, severeUrgent:sevMod[m]||0}))
     .sort((a,b)=> (b.bugCount-a.bugCount) || a.module.localeCompare(b.module,'zh'));
   const componentWithBug = components.filter(c=>c.bugCount>0).length;
   const moduleWithBug = modules.filter(m=>m.bugCount>0).length;
-  return {overview:{bugTotal, componentSum, componentWithBug, moduleWithBug}, modules, components};
+  return {overview:{bugTotal, componentSum, componentWithBug, moduleWithBug, severeUrgentTotal}, modules, components};
 }
 
 function refresh(){
-  stats = computeStats(mappingOrder, mappingMap, bugValues);
+  stats = computeStats(mappingOrder, mappingMap, bugRecords);
   render();
 }
 
@@ -278,15 +294,37 @@ function render(){
   document.getElementById('kComp').textContent = o.componentWithBug;
   document.getElementById('kMod').textContent = o.moduleWithBug;
   document.getElementById('kSum').textContent = o.componentSum;
+  document.getElementById('kSev').textContent = o.severeUrgentTotal;
   renderCharts();
   renderTable();
 }
 
 function renderCharts(){
   const modData = stats.modules.filter(m=>m.bugCount>0);
-  renderBarChart('chartModule', modData.map(m=>m.module), modData.map(m=>m.bugCount), '模块');
+  renderModuleChart('chartModule', modData);
   const top = stats.components.slice(0,20);
   renderBarChart('chartComp', top.map(c=>c.component), top.map(c=>c.bugCount), '组件');
+}
+
+function renderModuleChart(id, mods){
+  const el = document.getElementById(id);
+  let chart = echarts.getInstanceByDom(el);
+  if(!chart) chart = echarts.init(el);
+  const cats = mods.map(m=>m.module).slice().reverse();
+  const total = mods.map(m=>m.bugCount).slice().reverse();
+  const sev = mods.map(m=>m.severeUrgent||0).slice().reverse();
+  chart.setOption({
+    grid:{left:8,right:46,top:34,bottom:8,containLabel:true},
+    legend:{data:['BUG 数量','严重+紧急'],top:0},
+    tooltip:{trigger:'axis',axisPointer:{type:'shadow'}},
+    xAxis:{type:'value',splitLine:{lineStyle:{color:'#eef1f7'}}},
+    yAxis:{type:'category',data:cats,axisLine:{show:false},axisTick:{show:false},axisLabel:{fontSize:11,color:'#475569'}},
+    series:[
+      {name:'BUG 数量',type:'bar',data:total,barMaxWidth:9,itemStyle:{color:'#2563eb',borderRadius:[0,2,2,0]}},
+      {name:'严重+紧急',type:'bar',data:sev,barMaxWidth:9,itemStyle:{color:'#dc2626',borderRadius:[0,2,2,0]}}
+    ]
+  });
+  chart.resize();
 }
 
 function renderBarChart(id, names, values, unit){
@@ -345,9 +383,10 @@ function renderTable(){
       <th data-k="module">模块</th>
       <th data-k="componentCount" class="num">有 BUG 组件数</th>
       <th data-k="bugCount" class="num">BUG 数量</th>
+      <th data-k="severeUrgent" class="num">严重+紧急</th>
       <th class="num">占比</th>
     </tr></thead><tbody>`;
-    if(rows.length===0){ html += `<tr><td colspan="5" class="empty">暂无匹配结果</td></tr>`; }
+    if(rows.length===0){ html += `<tr><td colspan="6" class="empty">暂无匹配结果</td></tr>`; }
     const max = stats.modules.length ? stats.modules[0].bugCount : 0;
     rows.forEach((m,i)=>{
       html += `<tr>
@@ -355,6 +394,7 @@ function renderTable(){
         <td class="comp">${esc(m.module)}</td>
         <td class="num">${m.componentCount}</td>
         <td class="num"><div class="bar-cell" style="justify-content:flex-end"><span style="font-weight:700">${m.bugCount}</span><div class="bar-bg" style="max-width:120px"><div class="bar-fill" style="width:${max? (m.bugCount/max*100):0}%"></div></div></div></td>
+        <td class="num" style="color:#dc2626;font-weight:600">${m.severeUrgent||0}</td>
         <td class="num" style="color:var(--muted)">${fmtPct(m.bugCount)}</td>
       </tr>`;
     });
@@ -366,7 +406,7 @@ function renderTable(){
 
 function sortRows(rows, key, asc){
   return rows.slice().sort((a,b)=>{
-    if(key==='bugCount' || key==='componentCount'){
+    if(key==='bugCount' || key==='componentCount' || key==='severeUrgent'){
       return asc ? a[key]-b[key] : b[key]-a[key];
     }
     if(key==='index') return 0;
@@ -390,12 +430,12 @@ function esc(s){ return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;'
 
 function exportExcel(){
   if(!stats){ return; }
-  const modRows = stats.modules.map((m,i)=>[i+1, m.module, m.componentCount, m.bugCount, fmtPct(m.bugCount)]);
+  const modRows = stats.modules.map((m,i)=>[i+1, m.module, m.componentCount, m.bugCount, m.severeUrgent||0, fmtPct(m.bugCount)]);
   const compRows = stats.components.map((c,i)=>[i+1, c.component, c.module, c.bugCount, fmtPct(c.bugCount)]);
   const wb = XLSX.utils.book_new();
-  const ws1 = XLSX.utils.aoa_to_sheet([['#','模块','有 BUG 组件数','BUG 数量','占比']].concat(modRows));
+  const ws1 = XLSX.utils.aoa_to_sheet([['#','模块','有 BUG 组件数','BUG 数量','严重+紧急','占比']].concat(modRows));
   const ws2 = XLSX.utils.aoa_to_sheet([['#','组件','模块','BUG 数量','占比']].concat(compRows));
-  ws1['!cols'] = [{wch:5},{wch:18},{wch:14},{wch:12},{wch:10}];
+  ws1['!cols'] = [{wch:5},{wch:18},{wch:14},{wch:12},{wch:12},{wch:10}];
   ws2['!cols'] = [{wch:5},{wch:22},{wch:14},{wch:12},{wch:10}];
   XLSX.utils.book_append_sheet(wb, ws1, '模块汇总');
   XLSX.utils.book_append_sheet(wb, ws2, '组件明细');
@@ -437,12 +477,14 @@ function handleBugFile(file){
       const header = rows[0].map(String);
       let idx = header.findIndex(h => h.trim()==='组件');
       if(idx < 0){ alert('未找到“组件”列，请确认表头包含“组件”。'); return; }
-      const vals=[];
+      let pidx = header.findIndex(h => h.trim()==='优先级');
+      const recs=[];
       for(let i=1;i<rows.length;i++){
         const v = String(rows[i][idx]||'').trim();
-        if(v) vals.push(v);
+        if(!v) continue;
+        recs.push({comp:v, priority: pidx>=0 ? String(rows[i][pidx]||'').trim() : ''});
       }
-      bugValues = vals;
+      bugRecords = recs;
       document.getElementById('fnBug').textContent = file.name;
       setOnlyNonzero(true);
       refresh();
@@ -457,7 +499,7 @@ document.getElementById('btnExport').addEventListener('click', exportExcel);
 document.getElementById('btnReset').addEventListener('click', ()=>{
   mappingOrder = MAPPING_ORDER.slice();
   mappingMap = Object.assign({}, MAPPING_MAP);
-  bugValues = BUG_VALUES.slice();
+  bugRecords = BUG_RECORDS.slice();
   document.getElementById('fnMapping').textContent = '已内置默认文件';
   document.getElementById('fnBug').textContent = '未加载，请上传';
   setOnlyNonzero(false);
