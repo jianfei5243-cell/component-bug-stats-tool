@@ -27,11 +27,11 @@ main{max-width:1280px;margin:0 auto;padding:24px 20px 40px}
 label.filebtn{display:inline-flex;align-items:center;gap:6px;background:var(--soft);color:var(--brand);border:1px dashed #b8c4f0;border-radius:8px;padding:9px 14px;cursor:pointer;font-weight:600}
 label.filebtn:hover{background:#e4e9ff}
 .fname{max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)}
-.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:18px 0}
+.cards{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin:18px 0}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;box-shadow:0 1px 3px rgba(17,24,39,.05)}
 .card .num{font-size:30px;font-weight:800;line-height:1.1}
 .card .lbl{margin-top:8px;color:var(--muted);font-size:13px}
-.card .num.c1{color:var(--brand)}.card .num.c2{color:var(--brand2)}.card .num.c3{color:var(--ok)}.card .num.c4{color:var(--warn)}
+.card .num.c1{color:var(--brand)}.card .num.c2{color:var(--brand2)}.card .num.c3{color:var(--ok)}.card .num.c4{color:var(--warn)}.card .num.c5{color:#dc2626}
 .charts{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0}
 .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;box-shadow:0 1px 3px rgba(17,24,39,.05)}
 .panel h2{margin:0 0 4px;font-size:16px}
@@ -93,13 +93,14 @@ footer{margin-top:18px;color:var(--muted);font-size:12px;line-height:1.7}
   </section>
 
   <div id="emptyBanner" style="display:block;background:#fffbeb;border:1px solid #fde68a;color:#92400e;border-radius:12px;padding:14px 18px;margin-top:18px;font-size:14px">
-  <b>提示：</b>组件字典已内置《组件对应模块明细》。请点击上方「请输入BUGlist」上传 BUG 表，即可统计各组件 BUG 数量。
+  <b>提示：</b>组件字典已内置《组件对应模块明细》。请点击上方「请输入BUGlist」上传 BUG 表，即可统计各组件 BUG 数量及各模块“严重+紧急”数量。
 </div>
 <section class="cards">
     <div class="card"><div class="num c1" id="kTotal">-</div><div class="lbl">BUG 记录总数</div></div>
     <div class="card"><div class="num c2" id="kComp">-</div><div class="lbl">涉及组件数</div></div>
     <div class="card"><div class="num c3" id="kMod">-</div><div class="lbl">涉及模块数</div></div>
     <div class="card"><div class="num c4" id="kSum">-</div><div class="lbl">组件计数合计（含多组件归属）</div></div>
+    <div class="card"><div class="num c5" id="kSev">-</div><div class="lbl">严重+紧急 BUG</div></div>
   </section>
 
   <section class="charts">
@@ -147,11 +148,11 @@ __ECHARTS_LIB__
 <script>
 const MAPPING_ORDER = __MAPPING_ORDER__;
 const MAPPING_MAP = __MAPPING_MAP__;
-const BUG_VALUES = __BUG_VALUES__;
+const BUG_RECORDS = __BUG_RECORDS__;
 
 let mappingOrder = MAPPING_ORDER.slice();
 let mappingMap = Object.assign({}, MAPPING_MAP);
-let bugValues = BUG_VALUES.slice();
+let bugRecords = BUG_RECORDS.slice();
 let stats = null;
 let currentTab = 'comp';
 let sortKey = 'bugCount';
@@ -172,13 +173,28 @@ function splitTokens(s){
     .filter(Boolean);
 }
 
-function computeStats(order, map, bugs){
+function computeStats(order, map, bugRecords){
   const counts = {};
-  bugs.forEach(bv => splitTokens(bv).forEach(t => { counts[t] = (counts[t]||0)+1; }));
-  const bugTotal = bugs.length;
+  const sevComp = {};
+  const sevMod = {};
+  let severeUrgentTotal = 0;
+  bugRecords.forEach(rec => {
+    const toks = splitTokens(rec.comp);
+    toks.forEach(t => { counts[t] = (counts[t]||0)+1; });
+    const pri = String(rec.priority||'').trim();
+    if(pri === '严重' || pri === '紧急'){
+      severeUrgentTotal++;
+      toks.forEach(t => {
+        sevComp[t] = (sevComp[t]||0)+1;
+        const m = map[t] || '未分类';
+        sevMod[m] = (sevMod[m]||0)+1;
+      });
+    }
+  });
+  const bugTotal = bugRecords.length;
   const componentSum = Object.values(counts).reduce((a,b)=>a+b,0);
-  const components = order.map(c => ({component:c, module:map[c]||'未分类', bugCount:counts[c]||0}));
-  Object.keys(counts).forEach(t => { if(!(t in map)) components.push({component:t, module:'未分类', bugCount:counts[t]}); });
+  const components = order.map(c => ({component:c, module:map[c]||'未分类', bugCount:counts[c]||0, severeUrgent:sevComp[c]||0}));
+  Object.keys(counts).forEach(t => { if(!(t in map)) components.push({component:t, module:'未分类', bugCount:counts[t], severeUrgent:sevComp[t]||0}); });
   components.sort((a,b)=> (b.bugCount-a.bugCount) || a.component.localeCompare(b.component,'zh'));
   const modBug = {}, modComp = {};
   components.forEach(c => {
@@ -186,15 +202,15 @@ function computeStats(order, map, bugs){
     if(c.bugCount>0) modComp[c.module] = (modComp[c.module]||0) + 1;
   });
   const modules = Object.keys(modBug)
-    .map(m => ({module:m, bugCount:modBug[m], componentCount:modComp[m]||0}))
+    .map(m => ({module:m, bugCount:modBug[m], componentCount:modComp[m]||0, severeUrgent:sevMod[m]||0}))
     .sort((a,b)=> (b.bugCount-a.bugCount) || a.module.localeCompare(b.module,'zh'));
   const componentWithBug = components.filter(c=>c.bugCount>0).length;
   const moduleWithBug = modules.filter(m=>m.bugCount>0).length;
-  return {overview:{bugTotal, componentSum, componentWithBug, moduleWithBug}, modules, components};
+  return {overview:{bugTotal, componentSum, componentWithBug, moduleWithBug, severeUrgentTotal}, modules, components};
 }
 
 function refresh(){
-  stats = computeStats(mappingOrder, mappingMap, bugValues);
+  stats = computeStats(mappingOrder, mappingMap, bugRecords);
   render();
 }
 
@@ -211,15 +227,37 @@ function render(){
   document.getElementById('kComp').textContent = o.componentWithBug;
   document.getElementById('kMod').textContent = o.moduleWithBug;
   document.getElementById('kSum').textContent = o.componentSum;
+  document.getElementById('kSev').textContent = o.severeUrgentTotal;
   renderCharts();
   renderTable();
 }
 
 function renderCharts(){
   const modData = stats.modules.filter(m=>m.bugCount>0);
-  renderBarChart('chartModule', modData.map(m=>m.module), modData.map(m=>m.bugCount), '模块');
+  renderModuleChart('chartModule', modData);
   const top = stats.components.slice(0,20);
   renderBarChart('chartComp', top.map(c=>c.component), top.map(c=>c.bugCount), '组件');
+}
+
+function renderModuleChart(id, mods){
+  const el = document.getElementById(id);
+  let chart = echarts.getInstanceByDom(el);
+  if(!chart) chart = echarts.init(el);
+  const cats = mods.map(m=>m.module).slice().reverse();
+  const total = mods.map(m=>m.bugCount).slice().reverse();
+  const sev = mods.map(m=>m.severeUrgent||0).slice().reverse();
+  chart.setOption({
+    grid:{left:8,right:46,top:34,bottom:8,containLabel:true},
+    legend:{data:['BUG 数量','严重+紧急'],top:0},
+    tooltip:{trigger:'axis',axisPointer:{type:'shadow'}},
+    xAxis:{type:'value',splitLine:{lineStyle:{color:'#eef1f7'}}},
+    yAxis:{type:'category',data:cats,axisLine:{show:false},axisTick:{show:false},axisLabel:{fontSize:11,color:'#475569'}},
+    series:[
+      {name:'BUG 数量',type:'bar',data:total,barMaxWidth:9,itemStyle:{color:'#2563eb',borderRadius:[0,2,2,0]}},
+      {name:'严重+紧急',type:'bar',data:sev,barMaxWidth:9,itemStyle:{color:'#dc2626',borderRadius:[0,2,2,0]}}
+    ]
+  });
+  chart.resize();
 }
 
 function renderBarChart(id, names, values, unit){
@@ -278,9 +316,10 @@ function renderTable(){
       <th data-k="module">模块</th>
       <th data-k="componentCount" class="num">有 BUG 组件数</th>
       <th data-k="bugCount" class="num">BUG 数量</th>
+      <th data-k="severeUrgent" class="num">严重+紧急</th>
       <th class="num">占比</th>
     </tr></thead><tbody>`;
-    if(rows.length===0){ html += `<tr><td colspan="5" class="empty">暂无匹配结果</td></tr>`; }
+    if(rows.length===0){ html += `<tr><td colspan="6" class="empty">暂无匹配结果</td></tr>`; }
     const max = stats.modules.length ? stats.modules[0].bugCount : 0;
     rows.forEach((m,i)=>{
       html += `<tr>
@@ -288,6 +327,7 @@ function renderTable(){
         <td class="comp">${esc(m.module)}</td>
         <td class="num">${m.componentCount}</td>
         <td class="num"><div class="bar-cell" style="justify-content:flex-end"><span style="font-weight:700">${m.bugCount}</span><div class="bar-bg" style="max-width:120px"><div class="bar-fill" style="width:${max? (m.bugCount/max*100):0}%"></div></div></div></td>
+        <td class="num" style="color:#dc2626;font-weight:600">${m.severeUrgent||0}</td>
         <td class="num" style="color:var(--muted)">${fmtPct(m.bugCount)}</td>
       </tr>`;
     });
@@ -299,7 +339,7 @@ function renderTable(){
 
 function sortRows(rows, key, asc){
   return rows.slice().sort((a,b)=>{
-    if(key==='bugCount' || key==='componentCount'){
+    if(key==='bugCount' || key==='componentCount' || key==='severeUrgent'){
       return asc ? a[key]-b[key] : b[key]-a[key];
     }
     if(key==='index') return 0;
@@ -323,12 +363,12 @@ function esc(s){ return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;'
 
 function exportExcel(){
   if(!stats){ return; }
-  const modRows = stats.modules.map((m,i)=>[i+1, m.module, m.componentCount, m.bugCount, fmtPct(m.bugCount)]);
+  const modRows = stats.modules.map((m,i)=>[i+1, m.module, m.componentCount, m.bugCount, m.severeUrgent||0, fmtPct(m.bugCount)]);
   const compRows = stats.components.map((c,i)=>[i+1, c.component, c.module, c.bugCount, fmtPct(c.bugCount)]);
   const wb = XLSX.utils.book_new();
-  const ws1 = XLSX.utils.aoa_to_sheet([['#','模块','有 BUG 组件数','BUG 数量','占比']].concat(modRows));
+  const ws1 = XLSX.utils.aoa_to_sheet([['#','模块','有 BUG 组件数','BUG 数量','严重+紧急','占比']].concat(modRows));
   const ws2 = XLSX.utils.aoa_to_sheet([['#','组件','模块','BUG 数量','占比']].concat(compRows));
-  ws1['!cols'] = [{wch:5},{wch:18},{wch:14},{wch:12},{wch:10}];
+  ws1['!cols'] = [{wch:5},{wch:18},{wch:14},{wch:12},{wch:12},{wch:10}];
   ws2['!cols'] = [{wch:5},{wch:22},{wch:14},{wch:12},{wch:10}];
   XLSX.utils.book_append_sheet(wb, ws1, '模块汇总');
   XLSX.utils.book_append_sheet(wb, ws2, '组件明细');
@@ -370,12 +410,14 @@ function handleBugFile(file){
       const header = rows[0].map(String);
       let idx = header.findIndex(h => h.trim()==='组件');
       if(idx < 0){ alert('未找到“组件”列，请确认表头包含“组件”。'); return; }
-      const vals=[];
+      let pidx = header.findIndex(h => h.trim()==='优先级');
+      const recs=[];
       for(let i=1;i<rows.length;i++){
         const v = String(rows[i][idx]||'').trim();
-        if(v) vals.push(v);
+        if(!v) continue;
+        recs.push({comp:v, priority: pidx>=0 ? String(rows[i][pidx]||'').trim() : ''});
       }
-      bugValues = vals;
+      bugRecords = recs;
       document.getElementById('fnBug').textContent = file.name;
       setOnlyNonzero(true);
       refresh();
@@ -390,7 +432,7 @@ document.getElementById('btnExport').addEventListener('click', exportExcel);
 document.getElementById('btnReset').addEventListener('click', ()=>{
   mappingOrder = MAPPING_ORDER.slice();
   mappingMap = Object.assign({}, MAPPING_MAP);
-  bugValues = BUG_VALUES.slice();
+  bugRecords = BUG_RECORDS.slice();
   document.getElementById('fnMapping').textContent = '已内置默认文件';
   document.getElementById('fnBug').textContent = '未加载，请上传';
   setOnlyNonzero(false);
