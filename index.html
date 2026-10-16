@@ -362,7 +362,7 @@ function renderBarChart(id, names, values, unit){
 }
 
 const DETAIL_COLS = [
-  {h:'关键字'},{h:'概要'},{h:'优先级'},{h:'状态'},{h:'组件'},{h:'报告人'},{h:'经办人'},{h:'创建日期'}
+  {h:'关键字'},{h:'概要'},{h:'优先级'},{h:'Reproduce Probability'},{h:'状态'},{h:'组件'},{h:'报告人'},{h:'经办人'},{h:'创建日期'}
 ];
 
 function fmtCell(h, v){
@@ -555,7 +555,7 @@ function exportExcel(){
     const cell = ws3[addr];
     if(cell) cell.l = { Target: r.url, TargetMode: 'External' };
   });
-  ws3['!cols'] = [{wch:12},{wch:16},{wch:50},{wch:8},{wch:10},{wch:22},{wch:10},{wch:10},{wch:18}];
+  ws3['!cols'] = [{wch:12},{wch:16},{wch:50},{wch:8},{wch:22},{wch:10},{wch:22},{wch:10},{wch:10},{wch:18}];
   XLSX.utils.book_append_sheet(wb, ws1, '模块汇总');
   XLSX.utils.book_append_sheet(wb, ws2, '组件明细');
   XLSX.utils.book_append_sheet(wb, ws3, '单子明细');
