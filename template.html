@@ -476,12 +476,19 @@ function exportExcel(){
           }
           return c.idx>=0 ? d.row[c.idx] : '';
         });
-        detailRows.push([g.module].concat(cells).concat([d.link && d.link.url ? d.link.url : '']));
+        detailRows.push({cells:[g.module].concat(cells), url: d.link && d.link.url ? d.link.url : ''});
       });
     });
   }
-  const ws3 = XLSX.utils.aoa_to_sheet([['模块'].concat(DETAIL_COLS.map(c=>c.label)).concat(['链接'])].concat(detailRows));
-  ws3['!cols'] = [{wch:12},{wch:16},{wch:50},{wch:8},{wch:10},{wch:22},{wch:10},{wch:10},{wch:18},{wch:50}];
+  const ws3 = XLSX.utils.aoa_to_sheet([['模块'].concat(DETAIL_COLS.map(c=>c.h))].concat(detailRows.map(r=>r.cells)));
+  // 关键字列（第 2 列，索引 1）设置为超链接
+  detailRows.forEach((r, idx) => {
+    if(!r.url) return;
+    const addr = XLSX.utils.encode_cell({r: idx+1, c: 1});
+    const cell = ws3[addr];
+    if(cell) cell.l = { Target: r.url, TargetMode: 'External' };
+  });
+  ws3['!cols'] = [{wch:12},{wch:16},{wch:50},{wch:8},{wch:10},{wch:22},{wch:10},{wch:10},{wch:18}];
   XLSX.utils.book_append_sheet(wb, ws1, '模块汇总');
   XLSX.utils.book_append_sheet(wb, ws2, '组件明细');
   XLSX.utils.book_append_sheet(wb, ws3, '单子明细');
