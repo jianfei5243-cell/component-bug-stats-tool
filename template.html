@@ -67,6 +67,8 @@ td.comp{font-weight:600}
 .grp-body{overflow:auto;max-height:420px}
 .grp-body table td{white-space:normal;vertical-align:top}
 .grp-body td.sum{max-width:420px;min-width:220px}
+.grp-body a.keylink{color:#2563eb;text-decoration:none;font-weight:600}
+.grp-body a.keylink:hover{text-decoration:underline}
 footer{margin-top:18px;color:var(--muted);font-size:12px;line-height:1.7}
 @media(max-width:900px){.cards{grid-template-columns:repeat(2,1fr)}.charts{grid-template-columns:1fr}}
 </style>
@@ -316,7 +318,7 @@ function buildGroupedDetails(kw){
     toks.forEach(t => {
       const m = mappingMap[t] || '未分类';
       if(!groups.has(m)) groups.set(m, []);
-      groups.get(m).push({row:d.row, comp:d.comp, module:m});
+      groups.get(m).push({row:d.row, comp:d.comp, module:m, link:d.link});
     });
   });
   const order = stats.modules.map(m=>m.module);
@@ -354,7 +356,14 @@ function renderDetails(kw){
         <thead><tr><th>模块</th>${cols.map(c=>`<th>${esc(c.label)}</th>`).join('')}</tr></thead>
         <tbody>`;
     g.list.forEach(d => {
-      html += `<tr><td><span class="tag">${esc(d.module)}</span></td>${cols.map(c=>`<td class="${c.cls}">${esc(c.idx>=0 ? fmtCell(c.label, d.row[c.idx]) : '')}</td>`).join('')}</tr>`;
+      html += `<tr><td><span class="tag">${esc(d.module)}</span></td>${cols.map(c=>{
+        if(c.label === '关键字'){
+          const txt = (d.link && d.link.text) ? d.link.text : (c.idx>=0 ? d.row[c.idx] : '');
+          const url = d.link && d.link.url ? d.link.url : '';
+          return url ? `<td class="${c.cls}"><a class="keylink" href="${esc(url)}" target="_blank" rel="noopener">${esc(txt)}</a></td>` : `<td class="${c.cls}">${esc(txt)}</td>`;
+        }
+        return `<td class="${c.cls}">${esc(c.idx>=0 ? fmtCell(c.label, d.row[c.idx]) : '')}</td>`;
+      }).join('')}</tr>`;
     });
     html += '</tbody></table></div></details>';
   });
@@ -460,11 +469,19 @@ function exportExcel(){
   if(bugHeaders.length){
     const dc = DETAIL_COLS.map(c => ({label:c.h, idx: colIndex(c.h)}));
     buildGroupedDetails('').forEach(g => {
-      g.list.forEach(d => { detailRows.push([g.module].concat(dc.map(c => c.idx>=0 ? d.row[c.idx] : ''))); });
+      g.list.forEach(d => {
+        const cells = dc.map(c => {
+          if(c.label === '关键字'){
+            return (d.link && d.link.text) ? d.link.text : (c.idx>=0 ? d.row[c.idx] : '');
+          }
+          return c.idx>=0 ? d.row[c.idx] : '';
+        });
+        detailRows.push([g.module].concat(cells).concat([d.link && d.link.url ? d.link.url : '']));
+      });
     });
   }
-  const ws3 = XLSX.utils.aoa_to_sheet([['模块'].concat(DETAIL_COLS.map(c=>c.label))].concat(detailRows));
-  ws3['!cols'] = [{wch:12},{wch:16},{wch:50},{wch:8},{wch:10},{wch:22},{wch:10},{wch:10},{wch:18}];
+  const ws3 = XLSX.utils.aoa_to_sheet([['模块'].concat(DETAIL_COLS.map(c=>c.label)).concat(['链接'])].concat(detailRows));
+  ws3['!cols'] = [{wch:12},{wch:16},{wch:50},{wch:8},{wch:10},{wch:22},{wch:10},{wch:10},{wch:18},{wch:50}];
   XLSX.utils.book_append_sheet(wb, ws1, '模块汇总');
   XLSX.utils.book_append_sheet(wb, ws2, '组件明细');
   XLSX.utils.book_append_sheet(wb, ws3, '单子明细');
@@ -507,12 +524,23 @@ function handleBugFile(file){
       let idx = header.findIndex(h => h.trim()==='组件');
       if(idx < 0){ alert('未找到“组件”列，请确认表头包含“组件”。'); return; }
       let pidx = header.findIndex(h => h.trim()==='优先级');
+      const kcol = header.findIndex(h => String(h||'').trim()==='关键字');
+      const linkByRow = {};
+      if(kcol >= 0 && ws['!ref']){
+        const range = XLSX.utils.decode_range(ws['!ref']);
+        for(let r = range.s.r + 1; r <= range.e.r; r++){
+          const cell = ws[XLSX.utils.encode_cell({r, c: kcol})];
+          if(cell && cell.l){
+            linkByRow[r] = { url: cell.l.Target || '', text: cell.l.display || '' };
+          }
+        }
+      }
       const recs=[], details=[];
       for(let i=1;i<rows.length;i++){
         const v = String(rows[i][idx]||'').trim();
         if(!v) continue;
         recs.push({comp:v, priority: pidx>=0 ? String(rows[i][pidx]||'').trim() : ''});
-        details.push({comp:v, priority: pidx>=0 ? String(rows[i][pidx]||'').trim() : '', row: rows[i].slice()});
+        details.push({comp:v, priority: pidx>=0 ? String(rows[i][pidx]||'').trim() : '', row: rows[i].slice(), link: linkByRow[i] || null});
       }
       bugHeaders = header;
       bugRecords = recs;
