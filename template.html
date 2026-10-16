@@ -58,6 +58,15 @@ td.comp{font-weight:600}
 .bar-fill{height:100%;background:linear-gradient(90deg,#60a5fa,#2563eb);border-radius:6px}
 .tag{display:inline-block;padding:2px 9px;border-radius:20px;font-size:12px;background:var(--soft);color:var(--brand);font-weight:600}
 .empty{text-align:center;color:var(--muted);padding:26px}
+.grp{border:1px solid var(--line);border-radius:10px;margin-bottom:10px;overflow:hidden;background:#fff}
+.grp summary{cursor:pointer;padding:12px 14px;background:#f8fafc;font-weight:700;display:flex;align-items:center;gap:10px;list-style:none}
+.grp summary::-webkit-details-marker{display:none}
+.grp summary:hover{background:#eef2ff}
+.grp-name{color:var(--brand)}
+.grp-count{color:var(--muted);font-weight:600;font-size:12px;background:#eef1f7;border-radius:20px;padding:2px 10px}
+.grp-body{overflow:auto;max-height:420px}
+.grp-body table td{white-space:normal;vertical-align:top}
+.grp-body td.sum{max-width:420px;min-width:220px}
 footer{margin-top:18px;color:var(--muted);font-size:12px;line-height:1.7}
 @media(max-width:900px){.cards{grid-template-columns:repeat(2,1fr)}.charts{grid-template-columns:1fr}}
 </style>
@@ -120,6 +129,7 @@ footer{margin-top:18px;color:var(--muted);font-size:12px;line-height:1.7}
     <div class="tabs">
       <button class="tab active" id="tabComp">组件明细</button>
       <button class="tab" id="tabMod">模块汇总</button>
+      <button class="tab" id="tabDetail">单子明细</button>
     </div>
     <div class="controls">
       <input type="text" id="search" placeholder="搜索组件或模块名称…">
@@ -127,7 +137,7 @@ footer{margin-top:18px;color:var(--muted);font-size:12px;line-height:1.7}
       <span style="color:var(--muted);font-size:12px" id="rowInfo"></span>
     </div>
     <div class="tbl-wrap">
-      <table id="tbl"></table>
+      <div id="tbl"></div>
     </div>
   </section>
 
@@ -153,6 +163,8 @@ const BUG_RECORDS = __BUG_RECORDS__;
 let mappingOrder = MAPPING_ORDER.slice();
 let mappingMap = Object.assign({}, MAPPING_MAP);
 let bugRecords = BUG_RECORDS.slice();
+let bugHeaders = [];
+let bugDetails = [];
 let stats = null;
 let currentTab = 'comp';
 let sortKey = 'bugCount';
@@ -280,14 +292,88 @@ function renderBarChart(id, names, values, unit){
   chart.resize();
 }
 
+const DETAIL_COLS = [
+  {h:'关键字'},{h:'概要'},{h:'优先级'},{h:'状态'},{h:'组件'},{h:'报告人'},{h:'经办人'},{h:'创建日期'}
+];
+
+function fmtCell(h, v){
+  if(h === '创建日期' && typeof v === 'number' && isFinite(v) && v > 20000 && v < 60000){
+    const d = new Date(Math.round((v - 25569) * 86400 * 1000));
+    const p = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+  }
+  return v;
+}
+
+function colIndex(h){
+  return bugHeaders.findIndex(x => String(x==null?'':x).trim() === h);
+}
+
+function buildGroupedDetails(kw){
+  const groups = new Map();
+  bugDetails.forEach(d => {
+    const toks = splitTokens(d.comp);
+    toks.forEach(t => {
+      const m = mappingMap[t] || '未分类';
+      if(!groups.has(m)) groups.set(m, []);
+      groups.get(m).push({row:d.row, comp:d.comp, module:m});
+    });
+  });
+  const order = stats.modules.map(m=>m.module);
+  const result = [];
+  groups.forEach((list, module) => {
+    if(kw){
+      list = list.filter(d => (module+' '+d.comp+' '+d.row.join(' ')).toLowerCase().includes(kw));
+      if(list.length===0) return;
+    }
+    result.push({module, list});
+  });
+  result.sort((a,b)=>{
+    const ia = order.indexOf(a.module), ib = order.indexOf(b.module);
+    if(ia>=0 && ib>=0) return ia-ib;
+    return (b.list.length - a.list.length) || a.module.localeCompare(b.module,'zh');
+  });
+  return result;
+}
+
+function renderDetails(kw){
+  const tbl = document.getElementById('tbl');
+  const groups = buildGroupedDetails(kw);
+  const totalShown = groups.reduce((a,g)=>a+g.list.length,0);
+  document.getElementById('rowInfo').textContent = `共 ${groups.length} 个模块分组，${totalShown} 条单子`;
+  if(bugDetails.length === 0){
+    tbl.innerHTML = '<div class="empty">请先上传 BUG 表，再查看单子明细。</div>';
+    return;
+  }
+  const cols = DETAIL_COLS.map(c => ({label:c.h, idx: colIndex(c.h), cls: c.h==='概要' ? 'sum' : ''}));
+  let html = '';
+  groups.forEach(g => {
+    html += `<details class="grp" ${kw ? 'open' : ''}>
+      <summary><span class="grp-name">${esc(g.module)}</span><span class="grp-count">${g.list.length} 条</span></summary>
+      <div class="grp-body"><table>
+        <thead><tr><th>模块</th>${cols.map(c=>`<th>${esc(c.label)}</th>`).join('')}</tr></thead>
+        <tbody>`;
+    g.list.forEach(d => {
+      html += `<tr><td><span class="tag">${esc(d.module)}</span></td>${cols.map(c=>`<td class="${c.cls}">${esc(c.idx>=0 ? fmtCell(c.label, d.row[c.idx]) : '')}</td>`).join('')}</tr>`;
+    });
+    html += '</tbody></table></div></details>';
+  });
+  if(groups.length===0) html = '<div class="empty">暂无匹配结果</div>';
+  tbl.innerHTML = html;
+}
+
 function renderTable(){
   const tbl = document.getElementById('tbl');
   const kw = document.getElementById('search').value.trim().toLowerCase();
+  if(currentTab === 'detail'){
+    renderDetails(kw);
+    return;
+  }
   if(currentTab === 'comp'){
     let rows = stats.components.filter(c => (!onlyNonzero || c.bugCount>0) && (c.component.toLowerCase().includes(kw) || c.module.toLowerCase().includes(kw)));
     rows = sortRows(rows, sortKey, sortAsc);
     document.getElementById('rowInfo').textContent = `共 ${rows.length} 个组件`;
-    let html = `<thead><tr>
+    let html = `<table><thead><tr>
       <th data-k="index" class="num">#</th>
       <th data-k="component">组件</th>
       <th data-k="module">模块</th>
@@ -305,13 +391,13 @@ function renderTable(){
         <td class="num" style="color:var(--muted)">${fmtPct(c.bugCount)}</td>
       </tr>`;
     });
-    html += '</tbody>';
+    html += '</tbody></table>';
     tbl.innerHTML = html;
   } else {
     let rows = stats.modules.filter(m => (!onlyNonzero || m.bugCount>0) && m.module.toLowerCase().includes(kw));
     rows = sortRows(rows, sortKey, sortAsc);
     document.getElementById('rowInfo').textContent = `共 ${rows.length} 个模块`;
-    let html = `<thead><tr>
+    let html = `<table><thead><tr>
       <th data-k="index" class="num">#</th>
       <th data-k="module">模块</th>
       <th data-k="componentCount" class="num">有 BUG 组件数</th>
@@ -331,7 +417,7 @@ function renderTable(){
         <td class="num" style="color:var(--muted)">${fmtPct(m.bugCount)}</td>
       </tr>`;
     });
-    html += '</tbody>';
+    html += '</tbody></table>';
     tbl.innerHTML = html;
   }
   bindSort();
@@ -370,8 +456,18 @@ function exportExcel(){
   const ws2 = XLSX.utils.aoa_to_sheet([['#','组件','模块','BUG 数量','占比']].concat(compRows));
   ws1['!cols'] = [{wch:5},{wch:18},{wch:14},{wch:12},{wch:12},{wch:10}];
   ws2['!cols'] = [{wch:5},{wch:22},{wch:14},{wch:12},{wch:10}];
+  const detailRows = [];
+  if(bugHeaders.length){
+    const dc = DETAIL_COLS.map(c => ({label:c.h, idx: colIndex(c.h)}));
+    buildGroupedDetails('').forEach(g => {
+      g.list.forEach(d => { detailRows.push([g.module].concat(dc.map(c => c.idx>=0 ? d.row[c.idx] : ''))); });
+    });
+  }
+  const ws3 = XLSX.utils.aoa_to_sheet([['模块'].concat(DETAIL_COLS.map(c=>c.label))].concat(detailRows));
+  ws3['!cols'] = [{wch:12},{wch:16},{wch:50},{wch:8},{wch:10},{wch:22},{wch:10},{wch:10},{wch:18}];
   XLSX.utils.book_append_sheet(wb, ws1, '模块汇总');
   XLSX.utils.book_append_sheet(wb, ws2, '组件明细');
+  XLSX.utils.book_append_sheet(wb, ws3, '单子明细');
   const d = new Date();
   const stamp = d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');
   XLSX.writeFile(wb, `组件BUG统计_${stamp}.xlsx`);
@@ -411,13 +507,16 @@ function handleBugFile(file){
       let idx = header.findIndex(h => h.trim()==='组件');
       if(idx < 0){ alert('未找到“组件”列，请确认表头包含“组件”。'); return; }
       let pidx = header.findIndex(h => h.trim()==='优先级');
-      const recs=[];
+      const recs=[], details=[];
       for(let i=1;i<rows.length;i++){
         const v = String(rows[i][idx]||'').trim();
         if(!v) continue;
         recs.push({comp:v, priority: pidx>=0 ? String(rows[i][pidx]||'').trim() : ''});
+        details.push({comp:v, priority: pidx>=0 ? String(rows[i][pidx]||'').trim() : '', row: rows[i].slice()});
       }
+      bugHeaders = header;
       bugRecords = recs;
+      bugDetails = details;
       document.getElementById('fnBug').textContent = file.name;
       setOnlyNonzero(true);
       refresh();
@@ -433,6 +532,8 @@ document.getElementById('btnReset').addEventListener('click', ()=>{
   mappingOrder = MAPPING_ORDER.slice();
   mappingMap = Object.assign({}, MAPPING_MAP);
   bugRecords = BUG_RECORDS.slice();
+  bugHeaders = [];
+  bugDetails = [];
   document.getElementById('fnMapping').textContent = '已内置默认文件';
   document.getElementById('fnBug').textContent = '未加载，请上传';
   setOnlyNonzero(false);
@@ -440,8 +541,16 @@ document.getElementById('btnReset').addEventListener('click', ()=>{
 });
 document.getElementById('search').addEventListener('input', renderTable);
 document.getElementById('onlyNonzero').addEventListener('change', e=>{ onlyNonzero = e.target.checked; renderTable(); });
-document.getElementById('tabComp').addEventListener('click', ()=>{ currentTab='comp'; document.getElementById('tabComp').classList.add('active'); document.getElementById('tabMod').classList.remove('active'); renderTable(); });
-document.getElementById('tabMod').addEventListener('click', ()=>{ currentTab='mod'; document.getElementById('tabMod').classList.add('active'); document.getElementById('tabComp').classList.remove('active'); renderTable(); });
+function setTab(name){
+  currentTab = name;
+  ['tabComp','tabMod','tabDetail'].forEach(id=>{
+    document.getElementById(id).classList.toggle('active', id === name);
+  });
+  renderTable();
+}
+document.getElementById('tabComp').addEventListener('click', ()=>setTab('comp'));
+document.getElementById('tabMod').addEventListener('click', ()=>setTab('mod'));
+document.getElementById('tabDetail').addEventListener('click', ()=>setTab('detail'));
 
 refresh();
 window.addEventListener('resize', ()=>{
